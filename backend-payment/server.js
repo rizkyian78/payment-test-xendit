@@ -5,6 +5,7 @@ const { uuid} = require('uuidv4');
 const sequelize = require("./models/index").sequelize
 const {DataTypes} = require("sequelize")
 const transactionModel = require("./models/transaction")
+const inquiryModel = require("./models/inquiry")
 
 const app = express();
 
@@ -13,6 +14,23 @@ app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+app.post("/inquiry", async(req, res)=> {
+  const data = await inquiryModel(sequelize, DataTypes).create({
+    name: req.body.name,
+    price: req.body.price,
+    area: req.body.area,
+    city: req.body.city,
+    phone: req.body.phone
+  })
+  res.status(200).json({data})
+})
+
+app.get("/inquiry/:id", async(req, res)=> {
+  const id = req.params.id
+  const data = await inquiryModel(sequelize, DataTypes).findByPk(id)
+  res.status(200).json({data})
+})
 
 app.post("/payment", async(req, res) => {
   const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
@@ -54,11 +72,30 @@ app.post("/check-payment", async(req, res) => {
   const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
 
     const authorization = Buffer.from(APIKEY).toString("base64")
+    console.log(req.body)
     const data = await transactionModel(sequelize, DataTypes).findOne({
+      where: {
       trx_id: req.body.trx_id
+      }
     })
-    
     const response = await axios.get("https://api.xendit.co/ewallets/charges/"+ data.reference_id,{
+    headers: {
+        Authorization: "Basic " + authorization,
+    }
+  })
+res.status(200).json({response: JSON.stringify(response.data)})
+})
+
+app.post("/check-payment-invoice", async(req, res) => {
+  const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
+
+    const authorization = Buffer.from(APIKEY).toString("base64")
+    const data = await transactionModel(sequelize, DataTypes).findOne({
+      where: {
+        trx_id: req.body.trx_id
+        }
+    })
+    const response = await axios.get("https://api.xendit.co/v2/invoices/"+ data.reference_id,{
     headers: {
         Authorization: "Basic " + authorization,
     }
@@ -72,15 +109,15 @@ app.post("/invoice", async(req, res) => {
     const authorization = Buffer.from(APIKEY).toString("base64")
     const reference_id = uuid()
     const data = {
-      "external_id": "payment-link-example",
+      "external_id": reference_id,
       "amount": 25000,
       "description": "Invoice Demo #123",
       "invoice_duration": 31536000,
       "customer": {
-          "given_names": "John",
-          "surname": "Doe",
-          "email": "johndoe@example.com",
-          "mobile_number": "+6287774441111",
+          "given_names": "rizky",
+          "surname": "ian",
+          "email": "rizkyian78@gmail.com",
+          "mobile_number": "+6285156937959",
           "addresses": [
               {
                   "city": "Jakarta Selatan",
@@ -137,12 +174,18 @@ app.post("/invoice", async(req, res) => {
           }
       ]
   }
+
     const response = await axios.post("https://api.xendit.co/v2/invoices", data,{
     headers: {
         Authorization: "Basic " + authorization,
     }
   })
+  await transactionModel(sequelize, DataTypes).create({
+    reference_id: response.data.id,
+    trx_id: reference_id
+  })
 res.status(200).json({response: response.data})
 })
 
 app.listen(8000, () => console.log("Listening"))
+
