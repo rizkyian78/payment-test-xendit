@@ -33,7 +33,7 @@ app.get("/inquiry/:id", async(req, res)=> {
 })
 
 app.post("/payment", async(req, res) => {
-  const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
+  const APIKEY = "<change_me>"
 
     const authorization = Buffer.from(APIKEY).toString("base64")
     const reference_id = uuid()
@@ -69,7 +69,7 @@ res.status(200).json({response: response.data})
 })
 
 app.post("/check-payment", async(req, res) => {
-  const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
+  const APIKEY = "<change_me>"
 
     const authorization = Buffer.from(APIKEY).toString("base64")
     console.log(req.body)
@@ -87,7 +87,7 @@ res.status(200).json({response: JSON.stringify(response.data)})
 })
 
 app.post("/check-payment-invoice", async(req, res) => {
-  const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
+  const APIKEY = "<change_me>"
 
     const authorization = Buffer.from(APIKEY).toString("base64")
     const data = await transactionModel(sequelize, DataTypes).findOne({
@@ -104,7 +104,7 @@ res.status(200).json({response: JSON.stringify(response.data)})
 })
 
 app.post("/invoice", async(req, res) => {
-  const APIKEY = "xnd_development_76yQSPzCnieawzohhGJk3mElDQ2XNbqtou0HTEbXZk6gUSHz3blvdSLlu5HmWF:"
+  const APIKEY = "<change_me>"
 
     const authorization = Buffer.from(APIKEY).toString("base64")
     const reference_id = uuid()
